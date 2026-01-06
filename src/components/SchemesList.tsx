@@ -3,6 +3,7 @@ import { Scheme, Language, CropType, LandSize } from '@/types/farmer';
 import { uiText } from '@/data/languages';
 import { crops, landSizes } from '@/data/crops';
 import { SchemeCard } from './SchemeCard';
+import { ChatBot } from './ChatBot';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Home, Bell, RefreshCw } from 'lucide-react';
 
@@ -123,6 +124,9 @@ export function SchemesList({ schemes, language, crop, landSize, onBack, onHome 
           </div>
         </motion.div>
       )}
+
+      {/* AI ChatBot */}
+      <ChatBot language={language} />
     </div>
   );
 }
