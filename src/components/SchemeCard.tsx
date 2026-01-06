@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Scheme, Language } from '@/types/farmer';
 import { uiText } from '@/data/languages';
-import { useTextToSpeech } from '@/hooks/useTextToSpeech';
+import { useElevenLabsTTS } from '@/hooks/useElevenLabsTTS';
 import { motion } from 'framer-motion';
-import { Volume2, VolumeX, Play, Pause, RotateCcw, IndianRupee, Sparkles, AlertTriangle } from 'lucide-react';
+import { Volume2, VolumeX, Play, Pause, RotateCcw, IndianRupee, Sparkles, AlertTriangle, Loader2 } from 'lucide-react';
+import farmerVideo from '@/assets/farmer-scheme-video.mp4';
 
 interface SchemeCardProps {
   scheme: Scheme;
@@ -12,9 +13,10 @@ interface SchemeCardProps {
 }
 
 export function SchemeCard({ scheme, language, index }: SchemeCardProps) {
-  const { speak, stop, isSpeaking } = useTextToSpeech();
+  const { speak, stop, isSpeaking, isLoading } = useElevenLabsTTS();
   const [showVideo, setShowVideo] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const handleListen = () => {
     if (isSpeaking) {
@@ -27,7 +29,31 @@ export function SchemeCard({ scheme, language, index }: SchemeCardProps) {
 
   const toggleVideo = () => {
     setShowVideo(!showVideo);
-    setIsPlaying(!showVideo);
+    if (!showVideo && videoRef.current) {
+      setTimeout(() => {
+        videoRef.current?.play();
+        setIsPlaying(true);
+      }, 100);
+    }
+  };
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  const handleReplay = () => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0;
+      videoRef.current.play();
+      setIsPlaying(true);
+    }
   };
 
   return (
@@ -69,27 +95,28 @@ export function SchemeCard({ scheme, language, index }: SchemeCardProps) {
         {scheme.shortDescription[language]}
       </p>
 
-      {/* Video placeholder */}
+      {/* Video section */}
       {showVideo && (
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
           className="mb-4"
         >
-          <div className="video-container bg-muted flex items-center justify-center">
-            <div className="text-center p-8">
-              <div className="text-5xl mb-4">🎬</div>
-              <p className="text-muted-foreground text-sm">
-                {language === 'en' 
-                  ? 'Video explanation coming soon' 
-                  : 'वीडियो जल्द आ रहा है'}
-              </p>
-            </div>
+          <div className="video-container relative overflow-hidden rounded-2xl">
+            <video
+              ref={videoRef}
+              src={farmerVideo}
+              className="w-full aspect-video object-cover"
+              onEnded={() => setIsPlaying(false)}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              playsInline
+            />
             
             {/* Video controls overlay */}
             <div className="video-controls flex justify-center gap-4">
               <button
-                onClick={() => setIsPlaying(!isPlaying)}
+                onClick={handlePlayPause}
                 className="icon-btn w-14 h-14 bg-card/90"
                 aria-label={isPlaying ? uiText.pause[language] : uiText.play[language]}
               >
@@ -100,7 +127,7 @@ export function SchemeCard({ scheme, language, index }: SchemeCardProps) {
                 )}
               </button>
               <button
-                onClick={() => setIsPlaying(true)}
+                onClick={handleReplay}
                 className="icon-btn w-14 h-14 bg-card/90"
                 aria-label={uiText.replay[language]}
               >
@@ -115,13 +142,19 @@ export function SchemeCard({ scheme, language, index }: SchemeCardProps) {
       <div className="flex gap-3">
         <button
           onClick={handleListen}
+          disabled={isLoading}
           className={`flex-1 touch-target rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
             isSpeaking 
               ? 'bg-destructive text-destructive-foreground' 
               : 'bg-secondary text-secondary-foreground hover:shadow-lg'
-          }`}
+          } ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
         >
-          {isSpeaking ? (
+          {isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              <span>{language === 'en' ? 'Loading...' : 'लोड हो रहा...'}</span>
+            </>
+          ) : isSpeaking ? (
             <>
               <VolumeX className="w-5 h-5" />
               <span>{language === 'en' ? 'Stop' : 'रुकें'}</span>
