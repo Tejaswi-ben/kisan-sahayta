@@ -65,13 +65,19 @@ export function ChatBot({ language }: ChatBotProps) {
       content: input.trim()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInput('');
     setIsLoading(true);
 
     try {
+      // Send full conversation history (excluding welcome message id)
+      const conversationHistory = updatedMessages
+        .filter(m => m.id !== 'welcome')
+        .map(m => ({ role: m.role, content: m.content }));
+
       const { data, error } = await supabase.functions.invoke('farmer-chat', {
-        body: { message: userMessage.content, language }
+        body: { messages: conversationHistory, language }
       });
 
       if (error) throw error;

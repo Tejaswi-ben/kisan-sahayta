@@ -11,11 +11,15 @@ serve(async (req) => {
   }
 
   try {
-    const { message, language } = await req.json();
+    const { messages, language } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     
     if (!LOVABLE_API_KEY) {
       throw new Error("LOVABLE_API_KEY is not configured");
+    }
+
+    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+      throw new Error("Messages array is required");
     }
 
     const languageNames: Record<string, string> = {
@@ -47,6 +51,17 @@ Example topics you can help with:
 
 Remember: The farmer may not be able to read, so your response will be read aloud to them. Keep it conversational and friendly.`;
 
+    // Build conversation with system prompt and user messages
+    const conversationMessages = [
+      { role: "system", content: systemPrompt },
+      ...messages.map((msg: { role: string; content: string }) => ({
+        role: msg.role,
+        content: msg.content
+      }))
+    ];
+
+    console.log("Sending messages to AI:", JSON.stringify(conversationMessages.slice(0, 2)));
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -55,10 +70,7 @@ Remember: The farmer may not be able to read, so your response will be read alou
       },
       body: JSON.stringify({
         model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message },
-        ],
+        messages: conversationMessages,
         max_tokens: 500,
       }),
     });
@@ -83,6 +95,8 @@ Remember: The farmer may not be able to read, so your response will be read alou
 
     const data = await response.json();
     const reply = data.choices?.[0]?.message?.content || "Sorry, I couldn't understand. Please try again.";
+
+    console.log("AI reply:", reply.substring(0, 100));
 
     return new Response(JSON.stringify({ reply }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
