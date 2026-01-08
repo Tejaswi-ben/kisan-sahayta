@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { LanguageSelection } from '@/components/LanguageSelection';
 import { SchemesPage } from '@/components/SchemesPage';
+import { AlertsPage } from '@/components/AlertsPage';
 import { FarmerProvider, useFarmer } from '@/context/FarmerContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Language } from '@/types/farmer';
 
-type Step = 'language' | 'schemes';
+type Step = 'language' | 'schemes' | 'alerts';
 
 function FarmerApp() {
   const { profile, setLanguage, resetProfile } = useFarmer();
@@ -55,6 +56,23 @@ function FarmerApp() {
             <SchemesPage
               language={profile.language}
               onBack={handleBack}
+              onNavigateToAlerts={() => setStep('alerts')}
+            />
+          </motion.div>
+        )}
+
+        {step === 'alerts' && (
+          <motion.div
+            key="alerts"
+            variants={pageVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
+            transition={{ duration: 0.3 }}
+          >
+            <AlertsPage
+              language={profile.language}
+              onBack={() => setStep('schemes')}
             />
           </motion.div>
         )}

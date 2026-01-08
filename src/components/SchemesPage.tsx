@@ -6,14 +6,15 @@ import { SchemeCard } from './SchemeCard';
 import { ChatBot } from './ChatBot';
 import { WeatherWidget } from './WeatherWidget';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Home, Bell, Sprout, Shield, CheckCircle, BadgeCheck, Ban } from 'lucide-react';
+import { ArrowLeft, Home, Bell, Sprout, Shield, CheckCircle, BadgeCheck, Ban, AlertTriangle } from 'lucide-react';
 
 interface SchemesPageProps {
   language: Language;
   onBack: () => void;
+  onNavigateToAlerts: () => void;
 }
 
-export function SchemesPage({ language, onBack }: SchemesPageProps) {
+export function SchemesPage({ language, onBack, onNavigateToAlerts }: SchemesPageProps) {
   const allSchemes = schemes;
   const newSchemesCount = allSchemes.filter((s) => s.isNew || s.isUrgent).length;
 
@@ -40,8 +41,12 @@ export function SchemesPage({ language, onBack }: SchemesPageProps) {
           </div>
 
           <div className="flex gap-2">
-            <button className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center relative hover:bg-white/20 transition-colors">
-              <Bell className="w-5 h-5" />
+            <button 
+              onClick={onNavigateToAlerts}
+              className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center relative hover:bg-white/20 transition-colors"
+              aria-label="Alerts"
+            >
+              <AlertTriangle className="w-5 h-5" />
               {newSchemesCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-5 h-5 bg-destructive text-destructive-foreground text-xs rounded-full flex items-center justify-center">
                   {newSchemesCount}
