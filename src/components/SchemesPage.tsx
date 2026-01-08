@@ -6,7 +6,7 @@ import { SchemeCard } from './SchemeCard';
 import { ChatBot } from './ChatBot';
 import { WeatherWidget } from './WeatherWidget';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Home, Bell, Sprout } from 'lucide-react';
+import { ArrowLeft, Home, Bell, Sprout, Shield, CheckCircle, BadgeCheck, Ban } from 'lucide-react';
 
 interface SchemesPageProps {
   language: Language;
@@ -82,7 +82,7 @@ export function SchemesPage({ language, onBack }: SchemesPageProps) {
         </motion.h2>
 
         {/* Schemes List */}
-        <div className="space-y-4 mb-24">
+        <div className="space-y-4 mb-6">
           {allSchemes.map((scheme, index) => (
             <SchemeCard
               key={scheme.id}
@@ -92,6 +92,58 @@ export function SchemesPage({ language, onBack }: SchemesPageProps) {
             />
           ))}
         </div>
+
+        {/* About Us - Trust Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-card rounded-2xl p-6 mb-24 border border-border"
+        >
+          <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
+            <span className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
+              <Shield className="w-4 h-4 text-primary" />
+            </span>
+            {language === 'en' ? 'About AGRON' : 'AGRON के बारे में'}
+          </h3>
+
+          {/* Trust Elements */}
+          <div className="space-y-3 mb-6">
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-xl">
+              <CheckCircle className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-foreground">
+                {language === 'en' 
+                  ? 'Data sourced from official government portals' 
+                  : 'सरकारी पोर्टल से प्राप्त डेटा'}
+              </p>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-xl">
+              <BadgeCheck className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-foreground">
+                {language === 'en' 
+                  ? 'Verified badge ✔️ on each scheme' 
+                  : 'प्रत्येक योजना पर सत्यापित बैज ✔️'}
+              </p>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-xl">
+              <Ban className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-foreground">
+                {language === 'en' 
+                  ? 'No private or paid schemes shown' 
+                  : 'कोई निजी या भुगतान वाली योजनाएं नहीं'}
+              </p>
+            </div>
+          </div>
+
+          {/* Footer Disclaimer */}
+          <div className="border-t border-border pt-4">
+            <p className="text-xs text-muted-foreground text-center leading-relaxed">
+              {language === 'en' 
+                ? 'AGRON is an informational platform supporting farmers. Final approval depends on government authorities.' 
+                : 'AGRON किसानों का समर्थन करने वाला एक सूचना मंच है। अंतिम अनुमोदन सरकारी अधिकारियों पर निर्भर करता है।'}
+            </p>
+          </div>
+        </motion.div>
       </div>
 
       {/* AI ChatBot */}
